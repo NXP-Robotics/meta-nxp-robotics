@@ -207,6 +207,8 @@ if [ -n "$MACHINE_M7" ]; then
     cat <<EOF > $BUILD_DIR/conf/multiconfig/imx95-navq-m7.conf
 MACHINE ??= "$MACHINE_M7"
 DISTRO = "zephyr"
+PREFERRED_VERSION_zephyr-sdk = "0.17.4"
+PREFERRED_VERSION_zephyr-sdk-native = "0.17.4"
 ZEPHYR_TOOLCHAIN_VARIANT = "zephyr"
 EXTRA_IMAGE_FEATURES ?= "allow-empty-password empty-root-password allow-root-login"
 USER_CLASSES ?= "buildstats"
