@@ -10,6 +10,6 @@ ERROR_QA:remove = "patch-status"
 do_configure[mcdepends] += "mc:imx95-navqdesktop:imx95-navq-m7:zephyr-mcuboot:do_deploy"
 
 do_configure:append () {
-	cp ${TOPDIR}/tmp/m7_mcuboot_image.bin ${S}/iMX95/m7_mcuboot_image.bin
-	sed -i 's/m7_image.bin/m7_mcuboot_image.bin/' ${S}/iMX95/soc.mak
+        mkdir -p ${DEPLOY_DIR_IMAGE}/mcore-demos/
+        cp ${TOPDIR}/tmp/m7_mcuboot_image.bin ${DEPLOY_DIR_IMAGE}/mcore-demos/
 }
