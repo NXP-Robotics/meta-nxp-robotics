@@ -7,6 +7,11 @@ PV = "${@d.getVar('PREFERRED_VERSION_ubuntu-base', True) or '1.0'}"
 
 require fsl-image-common.inc
 
+# NAVQ95's M7 core is used for robotics-specific firmware - as such,
+# building MCUSDK-based M7 makes no sense so stop it from being added
+# to the image.
+MACHINE_EXTRA_RRECOMMENDS:remove = "imx-m7-demos"
+
 # This must be added first as it provides the foundation for
 # subsequent modifications to the rootfs
 IMAGE_INSTALL += "\
