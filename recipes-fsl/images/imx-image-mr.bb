@@ -72,6 +72,7 @@ APTGET_EXTRA_PACKAGES += "\
 	iw \
 	rfkill \
 	wireless-tools \
+	parted \
 "
 
 ##############################################################################
