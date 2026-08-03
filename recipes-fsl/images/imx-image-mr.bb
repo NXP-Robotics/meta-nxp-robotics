@@ -73,6 +73,8 @@ APTGET_EXTRA_PACKAGES += "\
 	rfkill \
 	wireless-tools \
 	parted \
+        tcpdump \
+        iperf3 \
 "
 
 ##############################################################################
