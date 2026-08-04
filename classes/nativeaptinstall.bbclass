@@ -808,9 +808,14 @@ PARALLELEOF
         fi
 
 	if [ -n "${APTGET_ROS_APT_SOURCE}" ]; then
-                LATEST_TAG_VERSION="${@oe.utils.getstatusoutput("curl -s https://api.github.com/repos/ros-infrastructure/ros-apt-source/releases/latest | grep '\"tag_name\"' | cut -d '\"' -f4")[1]}"
+                LATEST_TAG_VERSION="${@oe.utils.getstatusoutput("curl -fsS %s https://api.github.com/repos/ros-infrastructure/ros-apt-source/releases/latest | grep '\"tag_name\"' | cut -d '\"' -f4" % (('--proxy ' + d.getVar('https_proxy')) if d.getVar('https_proxy') else ''))[1]}"
+                case "$LATEST_TAG_VERSION" in
+                    ""|*[!0-9.]* )
+                        bbfatal "ros-apt-source tag lookup failed: got '$LATEST_TAG_VERSION'"
+                        ;;
+                esac
 		x="${APTGET_ROS_APT_SOURCE}"
-                chroot "${APTGET_CHROOT_DIR}" /usr/bin/curl -v -L -o /tmp/ros2-apt-source.deb "https://github.com/ros-infrastructure/ros-apt-source/releases/download/"$LATEST_TAG_VERSION"/ros2-apt-source_"$LATEST_TAG_VERSION"."$x"_all.deb"
+                chroot "${APTGET_CHROOT_DIR}" /usr/bin/env http_proxy="${http_proxy}" https_proxy="${https_proxy}" /usr/bin/curl -fL -o /tmp/ros2-apt-source.deb "https://github.com/ros-infrastructure/ros-apt-source/releases/download/$LATEST_TAG_VERSION/ros2-apt-source_${LATEST_TAG_VERSION}.${x}_all.deb"
                 chroot "${APTGET_CHROOT_DIR}" /usr/bin/dpkg -i /tmp/ros2-apt-source.deb
                 chroot "${APTGET_CHROOT_DIR}" ${APTGET_EXECUTABLE} ${APTGET_DEFAULT_OPTS} update
         fi
