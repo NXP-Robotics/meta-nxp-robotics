@@ -23,8 +23,8 @@ do_deploy() {
     local fw
     fw=$(ls ${D}/firmware/${PN}*.bin 2>/dev/null | head -1)
     if [ -n "$fw" ]; then
-        mkdir -p ${TOPDIR}/tmp
-        cp "$fw" ${TOPDIR}/tmp/m7_mcuboot_image.bin
+        mkdir -p ${DEPLOYDIR}/mcore-demos
+        cp "$fw" ${DEPLOYDIR}/mcore-demos/m7_mcuboot_image.bin
     else
         bbfatal "zephyr-mcuboot: no .bin found in ${D}/firmware/"
     fi
