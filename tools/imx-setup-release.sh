@@ -189,51 +189,6 @@ echo "BBLAYERS += \"\${BSPDIR}/sources/meta-security/meta-tpm\"" >> $BUILD_DIR/c
 echo "BBLAYERS += \"\${BSPDIR}/sources/meta-virtualization\"" >> $BUILD_DIR/conf/bblayers.conf
 echo "BBLAYERS += \"\${BSPDIR}/sources/meta-freescale-ml\"" >> $BUILD_DIR/conf/bblayers.conf
 
-if [[ "$MACHINE" == "imx95-navqadesktop" ]]; then
-    MACHINE_M7=imx95-navqa-m7
-elif [[ "$MACHINE" == "imx95-navqbdesktop" ]]; then
-    MACHINE_M7=imx95-navqb-m7
-fi
-
-if [ -n "$MACHINE_M7" ]; then
-
-    # Adapt to multi machine configuration (multiconfig)
-
-    mkdir -p $BUILD_DIR/conf/multiconfig
-
-    cp $BUILD_DIR/conf/local.conf $BUILD_DIR/conf/multiconfig/imx95-navqdesktop.conf
-    echo "TMPDIR=\"\${TOPDIR}/tmp-imx95-navq\"" >> $BUILD_DIR/conf/multiconfig/imx95-navqdesktop.conf
-
-    cat <<EOF > $BUILD_DIR/conf/multiconfig/imx95-navq-m7.conf
-MACHINE ??= "$MACHINE_M7"
-DISTRO = "zephyr"
-PREFERRED_VERSION_zephyr-sdk = "0.17.4"
-PREFERRED_VERSION_zephyr-sdk-native = "0.17.4"
-ZEPHYR_TOOLCHAIN_VARIANT = "zephyr"
-EXTRA_IMAGE_FEATURES ?= "allow-empty-password empty-root-password allow-root-login"
-USER_CLASSES ?= "buildstats"
-PATCHRESOLVE = "noop"
-BB_DISKMON_DIRS ??= "\
-    STOPTASKS,${TMPDIR},1G,100K \
-    STOPTASKS,${DL_DIR},1G,100K \
-    STOPTASKS,${SSTATE_DIR},1G,100K \
-    STOPTASKS,/tmp,100M,100K \
-    HALT,${TMPDIR},100M,1K \
-    HALT,${DL_DIR},100M,1K \
-    HALT,${SSTATE_DIR},100M,1K \
-    HALT,/tmp,10M,1K"
-PACKAGECONFIG:append:pn-qemu-system-native = " sdl"
-CONF_VERSION = "2"
-TMPDIR="\${TOPDIR}/tmp-imx95-navq-m7"
-EOF
-
-    echo "BBMULTICONFIG ?= 'imx95-navqdesktop imx95-navq-m7'" >> $BUILD_DIR/conf/local.conf
-
-fi
-
-
-# /Adapt
-
 echo BSPDIR=$BSPDIR
 echo BUILD_DIR=$BUILD_DIR
 
