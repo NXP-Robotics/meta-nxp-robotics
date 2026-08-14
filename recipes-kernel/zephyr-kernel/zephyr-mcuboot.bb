@@ -12,6 +12,11 @@ DEPENDS += "python3-jsonschema-native"
 
 ZEPHYR_SRC_DIR = "${ZEPHYR_BASE}/../bootloader/mcuboot/boot/zephyr"
 
+# note1: we expect this to happen since the target architecture is arm64
+# note2: we are counting on the fact that ZEPHYR_TOOLCHAIN_VARIANT is set
+# to "zephyr" (i.e. use Zephyr SDK toolchain instead of OE's)
+INSANE_SKIP += "arch"
+
 do_deploy() {
     # Installed filename includes ZEPHYR_IMAGE_BASE_NAME suffix (machine + timestamp),
     # so use a glob to find the first .bin for ${PN}.

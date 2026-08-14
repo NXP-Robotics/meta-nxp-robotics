@@ -10,7 +10,7 @@ IMX_M4_DEMOS:mx95-nxp-bsp = ""
 
 ERROR_QA:remove = "patch-status"
 
-do_configure[mcdepends] += "mc:imx95-navqdesktop:imx95-navq-m7:zephyr-mcuboot:do_deploy"
+do_configure[depends] += "zephyr-mcuboot:do_deploy"
 
 do_configure:append () {
         mkdir -p ${DEPLOY_DIR_IMAGE}/mcore-demos/
