@@ -29,7 +29,7 @@ SRC_URI:append:imx8mpnavq = " \
 "
 
 SRCBRANCH = "imx95-navq-lf-6.18.y"
-SRCREV = "11431dc0c64673a9774d82920175d7deee9fed8a"
+SRCREV = "4a01f247e2f781d5fa06a9ef6f2924a66a32fcff"
 LINUX_IMX_SRC = "git://git@github.com/NXP-Robotics/linux-imx.git;protocol=https;branch=${SRCBRANCH}"
 SRC_URI = "${LINUX_IMX_SRC}"
 
