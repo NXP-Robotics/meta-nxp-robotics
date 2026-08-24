@@ -12,6 +12,10 @@ require fsl-image-common.inc
 # to the image.
 MACHINE_EXTRA_RRECOMMENDS:remove = "imx-m7-demos"
 
+IMAGE_INSTALL += "\
+	mavlink-router \
+"
+
 # This must be added first as it provides the foundation for
 # subsequent modifications to the rootfs
 IMAGE_INSTALL += "\
