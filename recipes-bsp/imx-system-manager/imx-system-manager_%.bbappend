@@ -1,7 +1,7 @@
 
 SRCBRANCH = "imx95-navq-lf-6.18.y-26Q2"
 IMX_SYSTEM_MANAGER_SRC = "git://git@github.com/NXP-Robotics/imx-sm.git;protocol=https;branch=${SRCBRANCH}"
-SRCREV = "958f60f7487be334cc117c1cd3f89ad9e6a0fec4"
+SRCREV = "9056ce149d313212b52b34a44d44c5a4d500aebb"
 
 LIC_FILES_CHKSUM = "file://LICENSE.txt;md5=f2a70813bc08547f509361c08b718861"
 
