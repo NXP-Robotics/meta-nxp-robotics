@@ -126,6 +126,7 @@ IMAGE_INSTALL:append:imx95-navq = " \
 	patrace \
 	${G2D_SAMPLES} \
 	reboot-to-fastboot \
+	robotics-visionai-example \
 	"
 
 # Don’t let pseudo track the transient lock file
