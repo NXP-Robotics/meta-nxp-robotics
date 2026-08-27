@@ -5,13 +5,18 @@ LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/MIT;md5=0835ade698e0bcf8506ecda
 
 FILESEXTRAPATHS:prepend := "${THISDIR}/files:"
 
-SRC_URI = "file://install_ros2_base.sh"
+SRC_URI = "file://install_ros2_base.sh \
+           file://install_ros2_env.sh \
+           "
 
 inherit allarch
 
 do_install() {
     install -d ${D}${bindir}
     install -m 755 ${UNPACKDIR}/install_ros2_base.sh ${D}${bindir}/install_ros2_base
+    install -m 755 ${UNPACKDIR}/install_ros2_env.sh  ${D}${bindir}/install_ros2_env
 }
 
-FILES:${PN} += "${bindir}/install_ros2_base"
+FILES:${PN} += "${bindir}/install_ros2_base \
+                ${bindir}/install_ros2_env \
+                "
