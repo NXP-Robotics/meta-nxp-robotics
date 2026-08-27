@@ -103,6 +103,7 @@ step_4_update() {
 }
 
 step_5_rosbase() {
+    sudo apt-mark unhold ros-jazzy-ros-base || true  # release any hold from a previous run
     if [ "$FLAG_LATEST" = "yes" ]; then
         # LATEST install -- no version pin, no hold.
         sudo apt install -y ros-jazzy-ros-base
