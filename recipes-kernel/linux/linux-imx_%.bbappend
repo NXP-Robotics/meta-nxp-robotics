@@ -28,9 +28,9 @@ SRC_URI:append:imx8mpnavq = " \
          file://uwb.cfg \
 "
 
-SRCBRANCH = "imx95-navq-lf-6.18.y"
+SRCBRANCH = "robotics-0.7.0"
 SRCREV = "784ec23da25bfd2e262805176617c78b616de86c"
-LINUX_IMX_SRC = "git://git@github.com/NXP-Robotics/linux-imx.git;protocol=https;branch=${SRCBRANCH}"
+LINUX_IMX_SRC = "git://git@github.com/nxp-mobilerobotics/robotics-linux.git;protocol=https;branch=${SRCBRANCH}"
 SRC_URI = "${LINUX_IMX_SRC}"
 
 do_configure:append () {
