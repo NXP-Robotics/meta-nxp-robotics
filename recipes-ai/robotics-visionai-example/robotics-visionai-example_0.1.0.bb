@@ -9,9 +9,9 @@ LIC_FILES_CHKSUM = "file://LICENSE;md5=d8ff2d641cc45adce1b1882be29d1e35"
 
 SRC_URI = "${ROBOTICS_VISIONAI_EXAMPLE_SRC};branch=${SRCBRANCH}"
 ROBOTICS_VISIONAI_EXAMPLE_SRC ?= "git://bitbucket.sw.nxp.com/tars/robotics-visionai-example.git;protocol=ssh;user=git"
-SRCBRANCH = "main"
+SRCBRANCH = "robotics-0.7.0"
 
-SRCREV = "eabfd69a7aaba5d78263cfe4187b07ffff3bda45"
+SRCREV = "f4f8ee1885e90397d4704ba6f1fe0698f77a3c7c"
 
 inherit python_setuptools_build_meta allarch
 
