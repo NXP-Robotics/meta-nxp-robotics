@@ -17,7 +17,7 @@
 #
 #   Flags can be combined, e.g.: install_ros2_env -i -l
 #
-set -euo pipefail
+set -eEuo pipefail
 trap 'printf "\nERROR: Installation aborted at line %s. Fix the issue above and\n\
 re-run the script.\nTip: use -i for step-by-step control (prompt before each step).\n" \
 "$LINENO"' ERR
