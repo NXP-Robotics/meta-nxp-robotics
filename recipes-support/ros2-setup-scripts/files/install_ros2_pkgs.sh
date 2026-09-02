@@ -59,10 +59,20 @@ ROS2PKG_ROSBAG2_USAGE="Record and play back topics (after sourcing your ROS2 env
 ROS2PKG_ROSBAG2_USAGE+="\n  ros2 bag record -a -o <bag>"
 ROS2PKG_ROSBAG2_USAGE+="\n  ros2 bag play <bag>"
 
+# px4_msgs: PX4 uORB message definitions
+ROS2PKG_PX4_MSGS_NAME="px4_msgs"
+ROS2PKG_PX4_MSGS_VERSION="${ROS2PKG_PX4_MSGS_VERSION:-release/1.17}"
+ROS2PKG_PX4_MSGS_INSTALL="pkg_install_px4_msgs"
+ROS2PKG_PX4_MSGS_REPORT="git -C \"\$HOME/ros2_ws/src/px4_msgs\" rev-parse --abbrev-ref HEAD"
+ROS2PKG_PX4_MSGS_REPORT+=" 2>/dev/null || echo '<not found>'"
+ROS2PKG_PX4_MSGS_USAGE="Source the workspace overlay before use:"
+ROS2PKG_PX4_MSGS_USAGE+="\n  source ~/ros2_ws/install/setup.bash"
+
 # Ordered list of package ids to process (one <ID> per ROS2PKG_<ID>_* block above).
 ROS2PKG_IDS=(
     "DEMO_NODES_CPP"
     "ROSBAG2"
+    "PX4_MSGS"
 )
 
 # --- Lookup-table accessors --------------------------------------------------
@@ -224,7 +234,28 @@ pkg_install_apt() {
 # Package-specific install functions (only for non-standard installs, e.g.
 # git clone + colcon build). Standard apt packages use pkg_install_apt above.
 # ============================================================================
-# (none yet)
+
+# pkg_install_px4_msgs <ID>
+# Build px4_msgs from source: fresh clone of the requested branch (VERSION),
+# then colcon build into ~/ros2_ws. With -l, clone the default branch (main).
+# The px4_msgs source is always re-cloned so the checked-out branch matches the
+# request; only src/px4_msgs is removed (the rest of the workspace is kept).
+pkg_install_px4_msgs() {
+    local id="$1" branch ws url dst
+    branch="$(pkg_field "$id" VERSION)"
+    ws="${HOME}/ros2_ws"
+    url="https://github.com/PX4/px4_msgs.git"
+    dst="${ws}/src/px4_msgs"
+    printf 'NOTE: px4_msgs is built from source with colcon -- this may take a while.\n'
+    mkdir -p "${ws}/src"
+    rm -rf "$dst"
+    if [ "$FLAG_LATEST" = "yes" ]; then
+        git clone --depth 1 "$url" "$dst"
+    else
+        git clone --depth 1 --branch "$branch" "$url" "$dst"
+    fi
+    ( cd "$ws" && colcon build --packages-select px4_msgs --cmake-args -DBUILD_TESTING=OFF )
+}
 
 # ============================================================================
 # Main
