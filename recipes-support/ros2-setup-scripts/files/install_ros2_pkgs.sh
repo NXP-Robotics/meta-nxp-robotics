@@ -65,6 +65,7 @@ ROS2PKG_IDS=(
     "ROSBAG2"
 )
 
+# --- Lookup-table accessors --------------------------------------------------
 # Read a field from the package lookup table.
 # pkg_field <ID> <FIELD>  ->  prints ROS2PKG_<ID>_<FIELD>
 pkg_field() {
@@ -72,35 +73,68 @@ pkg_field() {
     printf '%s' "${!var}"
 }
 
-# --- Flags -------------------------------------------------------------------
-# TODO: support installing only a selection of packages, e.g. positional
-#       package ids (install_ros2_pkgs DEMO_NODES_CPP ...) or an --only flag,
-#       defaulting to all packages in ROS2PKG_IDS when none are given.
+# Resolve a package NAME to its <ID> (prints the id, or nothing if unknown).
+# pkg_id_by_name <package-name>
+pkg_id_by_name() {
+    local want="$1" id
+    for id in "${ROS2PKG_IDS[@]}"; do
+        if [ "$(pkg_field "$id" NAME)" = "$want" ]; then
+            printf '%s' "$id"
+            return 0
+        fi
+    done
+    return 1
+}
+
+# --- Flags & package selection ----------------------------------------------
 FLAG_INTERACTIVE="no"
 FLAG_LATEST="no"
+SELECTED_NAMES=()   # package names requested on the CLI (empty = all)
 
 for arg in "$@"; do
     case "$arg" in
         -i) FLAG_INTERACTIVE="yes" ;;
         -l) FLAG_LATEST="yes" ;;
         -h)
-            printf 'Usage: install_ros2_pkgs [-i] [-l] [-h]\n\n'
-            printf '  (no flags)  Non-interactive: install all packages unattended\n'
+            printf 'Usage: install_ros2_pkgs [-i] [-l] [-h] [package ...]\n\n'
+            printf '  (no args)   Non-interactive: install all packages unattended\n'
             printf '              at their fixed versions.\n'
+            printf '  package ... Install only the named package(s); default is all.\n'
             printf '  -i          Interactive: prompt [Y/n] before each package\n'
             printf '  -l          Latest: install latest upstream packages\n'
             printf '              (ignores fixed versions)\n'
             printf '  -h          Show this help and exit\n\n'
             printf 'Packages to install (fixed version):\n'
             for id in "${ROS2PKG_IDS[@]}"; do
-                printf '  %s=%s\n' "$(pkg_field "$id" NAME)" "$(pkg_field "$id" VERSION)"
+                printf '  %-30s(%s)\n' "$(pkg_field "$id" NAME)" "$(pkg_field "$id" VERSION)"
             done
-            printf '\nFlags can be combined, e.g.: install_ros2_pkgs -i -l\n'
+            printf '\nExamples:\n'
+            printf '  install_ros2_pkgs                        # install all packages\n'
+            printf '  install_ros2_pkgs ros-jazzy-rosbag2      # install only the named package\n'
+            printf '  install_ros2_pkgs -i                     # prompt before each package\n'
+            printf '  install_ros2_pkgs -i -l px4_msgs         # flags and packages combine\n'
             exit 0
             ;;
-        *) printf 'Unknown flag: %s\nRun install_ros2_pkgs -h for usage.\n' "$arg"; exit 1 ;;
+        -*) printf 'Unknown flag: %s\nRun install_ros2_pkgs -h for usage.\n' "$arg"; exit 1 ;;
+        *)  SELECTED_NAMES+=("$arg") ;;
     esac
 done
+
+# Resolve the requested package names to ids; default to all when none given.
+SELECTED_IDS=()   # package ids to install this run (resolved from SELECTED_NAMES, or all)
+if [ "${#SELECTED_NAMES[@]}" -eq 0 ]; then
+    SELECTED_IDS=("${ROS2PKG_IDS[@]}")
+else
+    for name in "${SELECTED_NAMES[@]}"; do
+        id="$(pkg_id_by_name "$name")" || {
+            printf 'Unknown package: %s\n' "$name"
+            printf 'Known packages:\n'
+            for kid in "${ROS2PKG_IDS[@]}"; do printf '  %s\n' "$(pkg_field "$kid" NAME)"; done
+            exit 1
+        }
+        SELECTED_IDS+=("$id")
+    done
+fi
 
 # Prerequisite: ROS2 base must be installed (see install_ros2_base)
 # Override ROS_SETUP_BASH before running to point at a different ROS2 install.
@@ -117,8 +151,7 @@ if [ "$FLAG_LATEST" = "yes" ]; then
     printf -- '         (ignoring the fixed ROS2PKG_*_VERSION versions).\n'
 fi
 
-# Packages actually installed this run (populated on success, used by report/usage)
-INSTALLED_IDS=()
+INSTALLED_IDS=()   # packages installed this run (populated on success; used by report/usage)
 
 # ============================================================================
 # Generic helpers (do not change when adding a package)
@@ -209,8 +242,8 @@ else
     printf 'fixed versions\n'
 fi
 
-# Install (generic loop over the lookup table)
-for id in "${ROS2PKG_IDS[@]}"; do
+# Install (loop over the selected packages)
+for id in "${SELECTED_IDS[@]}"; do
     name="$(pkg_field "$id" NAME)"
     if [ "$FLAG_LATEST" = "yes" ]; then
         desc="Install ${name} (latest upstream)"
@@ -222,6 +255,6 @@ done
 
 pkg_report
 
-printf '\nSUCCESS. All packages completed.\n'
+printf '\nSUCCESS. All requested packages completed.\n'
 
 pkg_usage
