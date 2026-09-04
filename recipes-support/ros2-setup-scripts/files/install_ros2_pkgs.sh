@@ -254,6 +254,14 @@ pkg_install_px4_msgs() {
     else
         git clone --depth 1 --branch "$branch" "$url" "$dst"
     fi
+    # colcon needs the ROS2 build system (ament_cmake) sourced, which the
+    # prerequisite check does not guarantee. Source it if not already active.
+    if [ -z "${AMENT_PREFIX_PATH:-}" ]; then
+        set +u                # ROS setup files reference some unset vars
+        # shellcheck disable=SC1090
+        source "$ROS_SETUP_BASH"
+        set -u
+    fi
     ( cd "$ws" && colcon build --packages-select px4_msgs --cmake-args -DBUILD_TESTING=OFF )
 }
 
