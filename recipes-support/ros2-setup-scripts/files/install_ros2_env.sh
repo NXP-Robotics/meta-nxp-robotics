@@ -54,6 +54,15 @@ for arg in "$@"; do
     esac
 done
 
+# Prerequisite: ROS2 base must be installed (see install_ros2_base)
+# Override ROS_SETUP_BASH before running to point at a different ROS2 install.
+ROS_SETUP_BASH="${ROS_SETUP_BASH:-/opt/ros/jazzy/setup.bash}"
+if [ ! -f "$ROS_SETUP_BASH" ]; then
+    printf 'ERROR: ROS2 Jazzy not found (%s missing).\n' "$ROS_SETUP_BASH"
+    printf 'Run install_ros2_base first.\n'
+    exit 1
+fi
+
 # -l: fixed version is ignored
 if [ "$FLAG_LATEST" = "yes" ]; then
     printf -- 'WARNING: -l (latest) specified, latest upstream packages will be installed\n'
