@@ -29,7 +29,7 @@ Supported distributions
 
 The only supported distribution is `imx-desktop-xwayland`.
 
-Quick start quide
+Quick start guide
 -----------------
 
 ### Install the required host packages
