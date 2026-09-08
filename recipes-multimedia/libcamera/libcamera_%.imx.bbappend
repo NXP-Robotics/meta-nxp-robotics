@@ -44,6 +44,11 @@ do_install:append() {
         ${D}${datadir}/libcamera/ipa/nxp/neo/imx708_wide.yaml
 }
 
+# IMX477 (Sony Raspberry Pi HQ Camera) support - NXP NxpNeo IPA camera helper
+# and tuning data. The patch also registers imx477 in the neo/data meson build
+# so the tuning YAML is installed alongside the other sensor configs.
+SRC_URI += "file://0001-Add-imx477-libcamera.patch"
+
 # mali-imx moves EGL/GLES libs to ${libdir}/mali-imx/ for runtime GPU switching.
 # libcamera links Qt6Gui/Qt6OpenGL which have DT_NEEDED: libEGL.so.1/libGLESv2.so.2.
 # --rpath-link lets the linker resolve those transitive DT_NEEDED entries at build time.
