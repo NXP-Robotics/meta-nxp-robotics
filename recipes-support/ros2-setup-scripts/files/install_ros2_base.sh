@@ -102,8 +102,27 @@ step_4_update() {
     sudo apt upgrade -y
 }
 
+# Abort early if a different version of ros-jazzy-ros-base is already installed.
+# Prevents a confusing apt "version not found" error mid-install when the pinned
+# version has been removed from the repo.
+check_ros_version_conflict() {
+    local installed
+    installed="$(dpkg-query -W -f='${Version}' ros-jazzy-ros-base 2>/dev/null || true)"
+    [ -z "$installed" ] && return 0                     # not installed yet, no conflict
+    [ "$installed" = "$ROS_FIXED_VERSION" ] && return 0  # same version, no conflict
+    printf '\nERROR: ros-jazzy-ros-base is already installed at version %s,\n' "$installed"
+    printf '       but the script pins version %s.\n\n' "$ROS_FIXED_VERSION"
+    printf 'Fix: export the installed version and re-run:\n\n'
+    printf '    export ROS_FIXED_VERSION="%s"\n' "$installed"
+    printf '    install_ros2_base\n\n'
+    printf 'Or install the latest upstream version:\n\n'
+    printf '    install_ros2_base -l\n\n'
+    exit 1
+}
+
 step_5_rosbase() {
     sudo apt-mark unhold ros-jazzy-ros-base || true  # release any hold from a previous run
+    [ "$FLAG_LATEST" = "no" ] && check_ros_version_conflict
     if [ "$FLAG_LATEST" = "yes" ]; then
         # LATEST install -- no version pin, no hold.
         sudo apt install -y ros-jazzy-ros-base
