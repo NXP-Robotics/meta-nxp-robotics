@@ -29,7 +29,7 @@ SRC_URI:append:imx8mpnavq = " \
 "
 
 SRCBRANCH = "robotics-0.7.0"
-SRCREV = "21725f84a1e26234ecb98ce5da94585f29ae6a9e"
+SRCREV = "8116276518511e992f3dfb0db8f8b4a37add315e"
 LINUX_IMX_SRC = "git://git@github.com/nxp-mobilerobotics/robotics-linux.git;protocol=https;branch=${SRCBRANCH}"
 SRC_URI = "${LINUX_IMX_SRC}"
 
