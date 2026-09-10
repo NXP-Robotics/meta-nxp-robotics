@@ -7,12 +7,13 @@
 # environment setup (see install_ros2_base and install_ros2_env).
 #
 # USAGE:
-#   install_ros2_pkgs [-i] [-l] [-h]
+#   install_ros2_pkgs [-i] [-l] [--all-px4-msgs] [-h]
 #
 #   (no flags)  Non-interactive: install all packages unattended at their
 #               fixed versions.
 #   -i          Interactive: prompt [Y/n] before each package
 #   -l          Latest: install latest upstream packages (ignores fixed versions)
+#   --all-px4-msgs  Build every px4_msgs message instead of the T1 subset
 #   -h          Show this help and exit
 #
 #   Flags can be combined, e.g.: install_ros2_pkgs -i -l
@@ -99,20 +100,24 @@ pkg_id_by_name() {
 # --- Flags & package selection ----------------------------------------------
 FLAG_INTERACTIVE="no"
 FLAG_LATEST="no"
+FLAG_ALL_PX4_MSGS="no"
 SELECTED_NAMES=()   # package names requested on the CLI (empty = all)
 
 for arg in "$@"; do
     case "$arg" in
         -i) FLAG_INTERACTIVE="yes" ;;
         -l) FLAG_LATEST="yes" ;;
+        --all-px4-msgs) FLAG_ALL_PX4_MSGS="yes" ;;
         -h)
-            printf 'Usage: install_ros2_pkgs [-i] [-l] [-h] [package ...]\n\n'
+            printf 'Usage: install_ros2_pkgs [-i] [-l] [--all-px4-msgs] [-h] [package ...]\n\n'
             printf '  (no args)   Non-interactive: install all packages unattended\n'
             printf '              at their fixed versions.\n'
             printf '  package ... Install only the named package(s); default is all.\n'
             printf '  -i          Interactive: prompt [Y/n] before each package\n'
             printf '  -l          Latest: install latest upstream packages\n'
             printf '              (ignores fixed versions)\n'
+            printf '  --all-px4-msgs  Build every px4_msgs message definition instead\n'
+            printf '              of only those needed for the T1 usecase\n'
             printf '  -h          Show this help and exit\n\n'
             printf 'Packages to install (fixed version):\n'
             for id in "${ROS2PKG_IDS[@]}"; do
@@ -123,6 +128,7 @@ for arg in "$@"; do
             printf '  install_ros2_pkgs ros-jazzy-rosbag2      # install only the named package\n'
             printf '  install_ros2_pkgs -i                     # prompt before each package\n'
             printf '  install_ros2_pkgs -i -l px4_msgs         # flags and packages combine\n'
+            printf '  install_ros2_pkgs --all-px4-msgs         # build all px4_msgs messages\n'
             exit 0
             ;;
         -*) printf 'Unknown flag: %s\nRun install_ros2_pkgs -h for usage.\n' "$arg"; exit 1 ;;
@@ -254,6 +260,15 @@ pkg_install_px4_msgs() {
     else
         git clone --depth 1 --branch "$branch" "$url" "$dst"
     fi
+    # Build only msg/DistanceSensor and msg/Sensor*: px4_msgs globs msg/*.msg
+    # and srv/*.srv, so removing the rest from the clone reduces the package.
+    if [ "$FLAG_ALL_PX4_MSGS" = "no" ]; then
+        find "$dst/msg" -name '*.msg' ! -name 'DistanceSensor.msg' ! -name 'Sensor*.msg' -delete
+        find "$dst/srv" -name '*.srv' -delete
+        printf 'WARNING: This script only builds necessary messages for the T1 usecase.\n'
+        printf '         For full message support, rerun with --all-px4-msgs.\n'
+    fi
+    printf 'Building px4_msgs with %s messages.\n' "$(find "$dst/msg" -name '*.msg' | wc -l)"
     # colcon needs the ROS2 build system (ament_cmake) sourced, which the
     # prerequisite check does not guarantee. Source it if not already active.
     if [ -z "${AMENT_PREFIX_PATH:-}" ]; then
