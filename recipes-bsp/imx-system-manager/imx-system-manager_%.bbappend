@@ -1,7 +1,7 @@
 
 SRCBRANCH = "robotics-0.7.0"
 IMX_SYSTEM_MANAGER_SRC = "git://git@github.com/nxp-mobilerobotics/robotics-sm.git;protocol=https;branch=${SRCBRANCH}"
-SRCREV = "411b9d3865e092cd1998da48009b5e47d49e10b0"
+SRCREV = "dba53c7bd982b10e33a08653c4434d6cccd4aee5"
 
 LIC_FILES_CHKSUM = "file://LICENSE.txt;md5=f2a70813bc08547f509361c08b718861"
 
