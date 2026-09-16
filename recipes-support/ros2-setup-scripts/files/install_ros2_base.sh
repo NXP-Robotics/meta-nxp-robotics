@@ -1,60 +1,37 @@
 #!/usr/bin/env bash
 #
 # install_ros2_base
-# One-shot ROS2 Jazzy base installer.
+# One-shot ROS2 Jazzy base installer (always latest upstream).
 #
 # Mirrors the official ROS2 Jazzy deb install, step-by-step:
 #   https://docs.ros.org/en/jazzy/Installation/Ubuntu-Install-Debs.html
-# The ONLY board-specific difference is the fixed ros-jazzy-ros-base version
-# (see ROS_FIXED_VERSION below).
 #
 # USAGE:
-#   install_ros2_base [-i] [-l] [-h]
+#   install_ros2_base [-i] [-h]
 #
-#   (no flags)  Non-interactive: run all steps unattended, installs fixed version (ros-jazzy-ros-base=${ROS_FIXED_VERSION})
+#   (no flags)  Non-interactive: run all steps unattended, installs latest ros-jazzy-ros-base
 #   -i          Interactive: prompt [Y/n] before each step
-#   -l          Latest: install latest upstream ros-jazzy-ros-base (ignores fixed version)
 #   -h          Show this help and exit
-#
-#   Flags can be combined, e.g.: install_ros2_base -i -l
 #
 set -eEuo pipefail
 trap 'printf "\nERROR: Installation aborted at line %s. Fix the issue above and re-run the script.\nTip: use -i for step-by-step control (prompt before each step).\n" "$LINENO"' ERR
 
-# --- NavQ95-specific: fixed ros-jazzy-ros-base version ---------------------
-# Override by exporting ROS_FIXED_VERSION before running this script.
-# Read the version currently INSTALLED on a board:
-#   dpkg-query -W -f='${Version}\n' ros-jazzy-ros-base
-# Read the versions AVAILABLE in the repo (per architecture):
-#   apt-cache madison ros-jazzy-ros-base
-# NOTE: the package version is architecture-specific; pin the arm64 build for NavQ95.
-ROS_FIXED_VERSION="${ROS_FIXED_VERSION:-0.11.0-1noble.20260614.091815}"
-
 # --- Flags -------------------------------------------------------------------
 FLAG_INTERACTIVE="no"
-FLAG_LATEST="no"
 
 for arg in "$@"; do
     case "$arg" in
         -i) FLAG_INTERACTIVE="yes" ;;
-        -l) FLAG_LATEST="yes" ;;
         -h)
-            printf 'Usage: install_ros2_base [-i] [-l] [-h]\n\n'
-            printf '  (no flags)  Non-interactive: run all steps unattended, installs fixed version (ros-jazzy-ros-base=%s)\n' "${ROS_FIXED_VERSION}"
+            printf 'Usage: install_ros2_base [-i] [-h]\n\n'
+            printf '  (no flags)  Non-interactive: run all steps, install latest ros-jazzy\n'
             printf '  -i          Interactive: prompt [Y/n] before each step\n'
-            printf '  -l          Latest: install latest upstream ros-jazzy-ros-base (ignores fixed version)\n'
-            printf '  -h          Show this help and exit\n\n'
-            printf 'Flags can be combined, e.g.: install_ros2_base -i -l\n'
+            printf '  -h          Show this help and exit\n'
             exit 0
             ;;
         *) printf 'Unknown flag: %s\nRun install_ros2_base -h for usage.\n' "$arg"; exit 1 ;;
     esac
 done
-
-# -l: fixed version is ignored
-if [ "$FLAG_LATEST" = "yes" ]; then
-    printf -- 'WARNING: -l (latest) specified, latest upstream will be installed (ignoring pinned ROS_FIXED_VERSION=%s).\n' "${ROS_FIXED_VERSION}"
-fi
 
 TOTAL=7
 
@@ -75,22 +52,50 @@ run_step() {
     "$fn"
 }
 
-# Abort early if a different version of ros-jazzy-ros-base is already installed.
-# Prevents a confusing apt "version not found" error mid-install when the pinned
-# version has been removed from the repo.
-check_ros_version_conflict() {
-    local installed
+# Check whether ros-jazzy-ros-base is already installed and decide what to do in step 5.
+# Sets SKIP_ROSBASE=yes if the user declines the upgrade or if it is already at latest.
+SKIP_ROSBASE="no"
+check_ros_installed() {
+    local installed latest_ver ans
+
     installed="$(dpkg-query -W -f='${Version}' ros-jazzy-ros-base 2>/dev/null || true)"
-    [ -z "$installed" ] && return 0                     # not installed yet, no conflict
-    [ "$installed" = "$ROS_FIXED_VERSION" ] && return 0  # same version, no conflict
-    printf '\nERROR: ros-jazzy-ros-base is already installed at version %s,\n' "$installed"
-    printf '       but the script pins version %s.\n\n' "$ROS_FIXED_VERSION"
-    printf 'Fix: export the installed version and re-run:\n\n'
-    printf '    export ROS_FIXED_VERSION="%s"\n' "$installed"
-    printf '    install_ros2_base\n\n'
-    printf 'Or install the latest upstream version:\n\n'
-    printf '    install_ros2_base -l\n\n'
-    exit 1
+    [ -z "$installed" ] && return 0  # not installed, proceed with full install
+
+    # Fetch latest candidate from apt (requires apt lists; best-effort).
+    sudo apt-get update -qq 2>/dev/null || true
+    latest_ver="$(apt-cache policy ros-jazzy-ros-base 2>/dev/null \
+        | awk '/Candidate:/{print $2}')"
+
+    if [ "$installed" = "$latest_ver" ]; then
+        printf '\nros-jazzy-ros-base is already installed and up to date.\n'
+        printf 'Installed version: %s. Skipping install step.\n' "$installed"
+        SKIP_ROSBASE="yes"
+        return 0
+    fi
+
+    printf '\nWARNING: ros-jazzy-ros-base is already installed.\n'
+    printf '  Installed version : %s\n' "$installed"
+    printf '  Latest version    : %s\n' "${latest_ver:-<unknown>}"
+    printf '  This is NOT the latest version.\n\n'
+    printf 'Upgrade to the latest version? [Y/n] (auto-upgrading in 10 seconds) '
+
+    ans=""
+    if read -r -t 10 ans 2>/dev/null; then
+        ans="${ans:-y}"
+    else
+        printf '\n(Timeout reached, proceeding with upgrade.)\n'
+        ans="y"
+    fi
+
+    case "$ans" in
+        n|N)
+            printf 'Upgrade skipped. Keeping installed version %s.\n' "$installed"
+            SKIP_ROSBASE="yes"
+            ;;
+        *)
+            printf 'Upgrading ros-jazzy-ros-base to latest...\n'
+            ;;
+    esac
 }
 
 # --- Steps -------------------------------------------------------------------
@@ -121,16 +126,12 @@ step_4_update() {
 }
 
 step_5_rosbase() {
-    sudo apt-mark unhold ros-jazzy-ros-base || true  # release any hold from a previous run
-
-    if [ "$FLAG_LATEST" = "yes" ]; then
-        # LATEST install -- no version pin, no hold.
-        sudo apt install -y ros-jazzy-ros-base
-    else
-        # FIXED install -- the NavQ95-specific diff.
-        sudo apt install -y "ros-jazzy-ros-base=${ROS_FIXED_VERSION}"
-        sudo apt-mark hold ros-jazzy-ros-base    # prevent auto-upgrade off the baseline
+    if [ "$SKIP_ROSBASE" = "yes" ]; then
+        printf 'ros-jazzy-ros-base install/upgrade skipped.\n'
+        return 0
     fi
+    sudo apt-mark unhold ros-jazzy-ros-base || true  # release any hold from a previous run
+    sudo apt install -y ros-jazzy-ros-base
 }
 
 step_6_dev_tools() {
@@ -155,22 +156,15 @@ if [ "$FLAG_INTERACTIVE" = "yes" ]; then
 else
     printf 'non-interactive'
 fi
-printf ', version: '
-if [ "$FLAG_LATEST" = "yes" ]; then
-    printf 'latest upstream\n'
-    step5_desc="Install ros-jazzy-ros-base (latest upstream)"
-else
-    printf 'fixed (%s)\n' "${ROS_FIXED_VERSION}"
-    step5_desc="Install ros-jazzy-ros-base (fixed ${ROS_FIXED_VERSION})"
-fi
+printf ', version: latest upstream\n'
 
-[ "$FLAG_LATEST" = "no" ] && check_ros_version_conflict
+check_ros_installed
 
 run_step 1 "Set locale (UTF-8)"                          step_1_locale
 run_step 2 "Enable universe repository"                  step_2_universe
 run_step 3 "Add ROS2 apt source (ros2-apt-source deb)"   step_3_apt_source
 run_step 4 "apt update && upgrade"                       step_4_update
-run_step 5 "$step5_desc"                                 step_5_rosbase
+run_step 5 "Install ros-jazzy-ros-base (latest upstream)" step_5_rosbase
 run_step 6 "Install ros-dev-tools"                       step_6_dev_tools
 run_step 7 "Report installation"                         step_7_report
 
