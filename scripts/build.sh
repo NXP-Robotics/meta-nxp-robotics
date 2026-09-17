@@ -13,7 +13,7 @@ MANIFEST="imx-6.6.23-2.0.0.xml"
 DISTRO="imx-desktop-xwayland"
 SETUP="imx-setup-release.sh"
 BUILDDIR="build-desktop"
-NXP_META_IMAGE="meta-nxp-mr"
+NXP_META_IMAGE="meta-nxp-robotics"
 BUILD=`date +%Y%m%d.%H%M`; start=`date +%s`
 
 mkdir -p ~/bin

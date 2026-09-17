@@ -1,5 +1,5 @@
 # Override the EULA defined in meta-imx
-cp sources/meta-nxp-mr/EULA.txt sources/meta-imx/EULA.txt
+cp sources/meta-nxp-robotics/EULA.txt sources/meta-imx/EULA.txt
 
 source sources/meta-imx/tools/imx-setup-release.sh $@
 
@@ -16,7 +16,7 @@ if [ -f conf/local.conf ]; then
     echo "#ENV_HOST_PROXIES = \"http_proxy=\""                                    >> conf/local.conf
     echo ""                                                                       >> conf/local.conf
 
-    echo "BBLAYERS += \"\${BSPDIR}/sources/meta-nxp-mr\""                         >> conf/bblayers.conf
+    echo "BBLAYERS += \"\${BSPDIR}/sources/meta-nxp-robotics\""                         >> conf/bblayers.conf
 
     echo ""
     echo "IMX Desktop setup complete!"

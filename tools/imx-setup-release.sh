@@ -171,7 +171,7 @@ hook_in_layer meta-imx/meta-imx-v2x
 hook_in_layer meta-nxp-demo-experience
 hook_in_layer meta-nxp-connectivity/meta-nxp-matter-baseline
 hook_in_layer meta-nxp-connectivity/meta-nxp-openthread
-hook_in_layer meta-nxp-mr
+hook_in_layer meta-nxp-robotics
 hook_in_layer meta-zephyr/meta-zephyr-core
 hook_in_layer meta-zephyr/meta-zephyr-bsp
 
