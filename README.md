@@ -56,7 +56,7 @@ export PATH=~/bin:$PATH
 ```sh
 mkdir imx-yocto-bsp
 cd imx-yocto-bsp
-repo init -u https://github.com/nxp-mobilerobotics/imx-manifest-navq95 -b imx-linux-wrynose -m imx-6.18.20-2.0.0-navq.xml
+repo init -u https://github.com/nxp-robotics/robotics-linux-manifest.git -b imx-linux-wrynose -m imx-6.18.20-2.0.0-navq.xml
 repo sync
 ```
 
