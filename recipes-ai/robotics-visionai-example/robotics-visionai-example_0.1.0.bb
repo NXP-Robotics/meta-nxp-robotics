@@ -11,7 +11,7 @@ SRC_URI = "${ROBOTICS_VISIONAI_EXAMPLE_SRC};branch=${SRCBRANCH}"
 ROBOTICS_VISIONAI_EXAMPLE_SRC ?= "git://git@github.com/nxp-mobilerobotics/robotics-visionai-example.git;protocol=https;user=git"
 SRCBRANCH = "robotics-0.7.0"
 
-SRCREV = "aa577513f2adae0814215c45875f5cb97d488e4f"
+SRCREV = "d8266802ca3ea07b6c6af47780254202e2c47de7"
 
 inherit python_setuptools_build_meta allarch
 
