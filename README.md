@@ -22,7 +22,7 @@ Supported images
 
 This meta layer supports the following images:
 
-1. imx-image-mr
+1. imx-image-robotics
 
 Supported distributions
 -----------------------
@@ -76,10 +76,10 @@ For example:
 
 ```sh
 DISTRO=imx-desktop-xwayland MACHINE=imx95-navqdesktop source imx-setup-release.sh -b build
-bitbake imx-image-mr
+bitbake imx-image-robotics
 ```
 
-will build the `imx-image-mr` image for the `imx95-navqdesktop` machine (MR-NAVQ95 platform).
+will build the `imx-image-robotics` image for the `imx95-navqdesktop` machine (MR-NAVQ95 platform).
 
 Note
 ----

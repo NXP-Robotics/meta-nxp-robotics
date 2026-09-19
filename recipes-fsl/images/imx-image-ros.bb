@@ -1,5 +1,5 @@
 # A more complex image with ROS elements
-require imx-image-mr.bb
+require imx-image-robotics.bb
 
 CUSTOM_FILES_PATH := "${THISDIR}/files"
 SRC_URI = " \

@@ -23,6 +23,6 @@ if [ -f conf/local.conf ]; then
     echo ""
     echo "You can now build the following Desktop images:"
     echo ""
-    echo "$ bitbake imx-image-mr"
+    echo "$ bitbake imx-image-robotics"
     echo ""
 fi
