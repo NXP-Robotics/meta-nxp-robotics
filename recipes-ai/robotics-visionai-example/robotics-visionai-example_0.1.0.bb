@@ -8,7 +8,7 @@ LICENSE = "Proprietary"
 LIC_FILES_CHKSUM = "file://LICENSE;md5=d8ff2d641cc45adce1b1882be29d1e35"
 
 SRC_URI = "${ROBOTICS_VISIONAI_EXAMPLE_SRC};branch=${SRCBRANCH}"
-ROBOTICS_VISIONAI_EXAMPLE_SRC ?= "git://git@github.com/nxp-mobilerobotics/robotics-visionai-example.git;protocol=https;user=git"
+ROBOTICS_VISIONAI_EXAMPLE_SRC ?= "git://git@github.com/nxp-robotics/robotics-visionai-example.git;protocol=https;user=git"
 SRCBRANCH = "robotics-0.7.0"
 
 SRCREV = "d8266802ca3ea07b6c6af47780254202e2c47de7"
